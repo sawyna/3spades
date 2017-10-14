@@ -8,6 +8,11 @@ export default class CurrentRound extends React.Component {
 		this.state = {
 			cards: currentRoundStore.getCards()
 		};
+		this.store = {};
+	}
+
+	clickedCard(card) {
+		//NOOP
 	}
 
 	componentDidMount() {
@@ -27,7 +32,7 @@ export default class CurrentRound extends React.Component {
 
 		return (
 				<div style = {style}>
-					<CardDeck cards = {this.state.cards} />
+					<CardDeck cards = {this.state.cards} clickedCard = {this.clickedCard.bind(this)}/>
 				</div>
 			);
 	}

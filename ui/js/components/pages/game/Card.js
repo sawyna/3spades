@@ -5,14 +5,14 @@ export default class Card extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			"clicked": this.props.pressed
+			"clicked": this.props.clicked
 		};
 	}
 
 	componentWillReceiveProps(nextProps) {
 		this.props = nextProps;
 		this.setState({
-			clicked: this.props.pressed
+			clicked: this.props.clicked
 		});
 	}
 
@@ -20,16 +20,6 @@ export default class Card extends React.Component {
 		this.props.onCardClicked({
 			cardType: this.props.cardType,
 			cardNum: this.props.cardNum
-		}, () => {
-			console.log("callback called");
-			console.log(this.state);
-			this.setState((state, props) => {
-				console.log(state);
-				var newState =  {
-					"clicked": !(state.clicked)
-				};
-				return newState;
-			});
 		});
 	}
 
@@ -39,12 +29,14 @@ export default class Card extends React.Component {
 			"maxHeight": "100%"
 		};
 
-		var clickedButtonStyle = {
-			"borderStyle": "inset"
-		};
+		var Styles = {
+			clickedButtonStyle : {
+				"borderStyle": "inset"
+			},
 
-		var normalButtonStyle = {
-			"borderStyle": "outset"
+			normalButtonStyle : {
+				"borderStyle": "outset"
+			}
 		};
 
 		var cardNum = this.props.cardNum + 2;
@@ -65,6 +57,6 @@ export default class Card extends React.Component {
 			cardName = `ace_of_${this.props.cardType}.png`;
 		}
 
-		return <span style = {imgStyle}><button style = {this.state.clicked ? clickedButtonStyle : normalButtonStyle} onClick = {this.onClick.bind(this)}><img style = {imgStyle} draggable = "true" src={require('../../../../bundle/static/cards/' + cardName)} /></button></span>;
+		return <span style = {imgStyle}><button style = {this.state.clicked ? Styles.clickedButtonStyle : Styles.normalButtonStyle} onClick = {this.onClick.bind(this)}><img style = {imgStyle} draggable = "true" src={require('../../../../bundle/static/cards/' + cardName)} /></button></span>;
 	}
 }

@@ -4,6 +4,8 @@ var users = require('../db/queries/users');
 var games = require('../db/queries/games');
 var cardsHandler = require('../middleware/cardsHandler');
 var async = require('async');
+var RoundStore = require('./roundStore');
+var InfoStorage = require('./infoStorage');
 
 module.exports = {
 	bidEvents: function(io, socket) {
@@ -72,7 +74,7 @@ module.exports = {
 					}
 
 					async.parallel(fnArray, (err, results) => {
-						synctimers.bidTimer(io, socket, 30, data.gameId, "BID_TIMER", "BID_TIMER_RESET", "BID_END");
+						synctimers.bidTimer(io, socket, 10, data.gameId, "BID_TIMER", "BID_TIMER_RESET", "BID_END");
 						io.sockets.in(String(data.gameId)).emit("GAME_STARTED", {});
 					});
 				});
@@ -84,8 +86,35 @@ module.exports = {
 			games.updateHukumPartners(data, (results) => {
 				games.updateGameState(data.gameId, config.gameStates.WINNER_CHOOSE, () => {
 					io.sockets.in(String(data.gameId)).emit("HUKUM_PARTNERS_RESULT", data);
+					RoundStore(data.gameId, (roundStore) => {
+						InfoStorage.put(data.gameId, roundStore);
+						io.sockets.in(String(data.gameId)).emit("ROUND_TURN_START", roundStore.getInfo());
+					});
 				});
 			});
+		});
+	},
+
+	roundEvents: function(io, socket) {
+		socket.on("ROUND_TURN_DONE", (data) => {
+
+			var roundStore = InfoStorage.get(data.gameId);
+			console.log(roundStore);
+			//check if there is really an object
+			if(roundStore) {
+				roundStore.advanceRound(data);
+				io.sockets.in(String(data.gameId)).emit("ROUND_TURN_END", roundStore.getInfo());
+				if(roundStore.getInfo().last) {
+					roundStore.reset();
+					io.sockets.in(String(data.gameId)).emit("ROUND_WINNER", roundStore.getWinnerInfo());
+					if(!roundStore.isDone())
+						io.sockets.in(String(data.gameId)).emit("ROUND_TURN_START", roundStore.getInfo());
+				}
+				else {
+					roundStore.incrementTurn();
+					io.sockets.in(String(data.gameId)).emit("ROUND_TURN_START", roundStore.getInfo());
+				}
+			}
 		});
 	}
 };

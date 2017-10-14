@@ -9,5 +9,6 @@ manager.connector = function(io) {
 		events.bidEvents(io, socket);
 		events.joinHostEvents(io, socket);
 		events.gameEvents(io, socket);
+		events.roundEvents(io, socket);
 	});
 }

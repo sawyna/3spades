@@ -14,6 +14,8 @@ const updateHukumPartnersQuery = "UPDATE games SET hukum = '{hukum}', first_part
 const getGameStateQuery = "SELECT game_state from games where id = {gameId}";
 const getPlayerCount = "SELECT count(*) as users_count from users where game_id = {gameId}";
 const getAllPlayers = "SELECT * from users where game_id = {gameId}";
+const getHukumQuery = "SELECT * from games where id = {gameId}";
+const getBidWinnerQuery = "SELECT bid_winner from games where id = {gameId}";
 
 var games = {};
 
@@ -122,6 +124,18 @@ games.getGameState = function(gameId, callback) {
 		else {
 			throw new Error("query error");
 		}
+	});
+}
+
+games.getHukum = function(gameId, callback) {
+	client.runQuery(getHukumQuery, {gameId: gameId}, function(results, fields) {
+		callback(results, fields);
+	});
+}
+
+games.getBidWinner = function(gameId, callback) {
+	client.runQuery(getBidWinnerQuery, {gameId: gameId}, function(results, fields) {
+		callback(results, fields);
 	});
 }
 
