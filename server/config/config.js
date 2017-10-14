@@ -1,0 +1,37 @@
+module.exports = {
+	dbConfig: {
+		host: "localhost",
+		port: 3307,
+		user: "sawyna",
+		password: "yaswanth",
+		database: "3spades"
+	},
+
+	gameConfig: {
+		gameStates: {
+			GAME_INIT: -2,
+			GAME_START: -1,
+			BID_END: 0,
+			WINNER_CHOOSE: 1
+		},
+		MAX_PLAYERS: 7,
+		MIN_PLAYERS: 4,
+		BID_COUNTDOWN: 30
+	}
+};
+
+
+// {
+// 	playerList: [],
+// 	activeSuit: "",
+// 	first: true,
+// 	last: true,
+// 	winner: {
+// 		userId: 123,
+// 		card: {
+// 			suit: 
+// 			number:
+// 		}
+// 	},
+// 	currTurnIdx: 
+// }
