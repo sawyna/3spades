@@ -36,4 +36,7 @@ class GameStore {
 	}
 }
 
-export default new GameStore();
+var gameStore = new GameStore();
+window.gameStore = gameStore;
+
+export default gameStore;

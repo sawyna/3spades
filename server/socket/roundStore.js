@@ -91,9 +91,17 @@ module.exports = function(gameId, callback) {
 			});
 		},
 		bidWinner: function(callback) {
-			games.getBidWinner(gameId, (results) => {
+			games.getBidWinner(gameId)
+			.then((results) => {
 				callback(null, results[0].bid_winner);
+			})
+			.catch((error) => {
+				//do nothing for now
 			});
+			
+			// games.getBidWinner(gameId, (results) => {
+			// 	callback(null, results[0].bid_winner);
+			// });
 		}
 	},
 	(err, results) => {

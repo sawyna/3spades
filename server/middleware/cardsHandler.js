@@ -1,3 +1,4 @@
+var util = require('./commonUtil');
 var randomNumber = require("random-number");
 var handler = {};
 module.exports = handler;
@@ -55,7 +56,7 @@ handler.generateInitialDeck = function(users) {
 		temp.push(i);
 	}
 
-	utils.createARandomArray(temp, cardCount, 10);
+	util.createARandomArray(temp, cardCount, 10);
 	console.log(temp);
 
 	var j = 0;
@@ -111,34 +112,22 @@ handler.createDBFormatFromCard = function(card) {
 	return "NA";
 }
 
-var utils = {};
-utils.choose = function(from, to) {
-	var options = {
-		min: from,
-		max: to,
-		integer: true
+/*
+	If callback is not passed, empty card deck is returned by default
+*/
+handler.createCardDeck = function(callback) {
+	var emptyCardDeck = {
+		diamonds: handler.createDBFormatFromCard('-1'),
+		spades: handler.createDBFormatFromCard('-1'),
+		clubs: handler.createDBFormatFromCard('-1'),
+		hearts: handler.createDBFormatFromCard('-1')
 	};
 
-	return randomNumber(options);
-}
 
-utils.swap = function(i, j, arr) {
-	var temp = arr[i];
-	arr[i] = arr[j];
-	arr[j] = temp;
-}
+	if(util.isFunction(callback))
+		callback(emptyCardDeck);
 
-utils.createARandomArray = function createARandomArray(temp, n, iterations) {
-	if(iterations === 0)
-		return;
-
-	var pos = -1;
-	for(let i = n - 1; i > 0; i--) {
-		pos = utils.choose(0, i - 1);
-		utils.swap(i, pos, temp);
-	}
-
-	createARandomArray(temp, n, --iterations);
+	return emptyCardDeck;
 }
 
 

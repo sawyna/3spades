@@ -1,3 +1,4 @@
+var promiseUtil = require('../../middleware/promiseUtil');
 var client = require('../mysqlClient');
 var users = require('./users');
 var cardsHandler = require('../../middleware/cardsHandler');
@@ -19,123 +20,263 @@ const getBidWinnerQuery = "SELECT bid_winner from games where id = {gameId}";
 
 var games = {};
 
-games.insertNew = function(callback) {
+games.insertNew = function() {
 	var game = {gameState: gameConfig.gameStates.GAME_INIT};
 	console.log(game);
-	client.runQuery(insertNewGame, game, (results, fields) => {
-		var gameResponse = {};
-		gameResponse.id = results.insertId;
-		callback(gameResponse);
-	});
-}
 
-games.updateHukumPartners = function(data, callback) {
-	var cardDeck = {
-		diamonds: cardsHandler.createDBFormatFromCard('-1'),
-		spades: cardsHandler.createDBFormatFromCard('-1'),
-		clubs: cardsHandler.createDBFormatFromCard('-1'),
-		hearts: cardsHandler.createDBFormatFromCard('-1')
-	};
-
-	cardDeck[data.partnerInfo.firstPartner.suit] = cardsHandler.createDBFormatFromCard(data.partnerInfo.firstPartner.cards);
-
-	users.insertNewCardState(cardDeck, (firstPartner) => {
-		cardDeck = {
-		diamonds: cardsHandler.createDBFormatFromCard('-1'),
-		spades: cardsHandler.createDBFormatFromCard('-1'),
-		clubs: cardsHandler.createDBFormatFromCard('-1'),
-		hearts: cardsHandler.createDBFormatFromCard('-1')
-		};
-
-		cardDeck[data.partnerInfo.secondPartner.suit] = cardsHandler.createDBFormatFromCard(data.partnerInfo.secondPartner.cards);	
-		users.insertNewCardState(cardDeck, (secondPartner) => {
-			client.runQuery(updateHukumPartnersQuery, {
-				gameId: data.gameId,
-				hukum: data.partnerInfo.hukum,
-				firstPartnerId: firstPartner.insertId,
-				secondPartnerId: secondPartner.insertId
-			}, (results, fields) => {
-				callback(results);
-			});
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(insertNewGame, game)
+		.then((results, fields) => {
+			var gameResponse = {};
+			gameResponse.id = results.insertId;
+			resolve(gameResponse);
+		})
+		.catch((error) => {
+			reject(error);
 		});
 	});
 }
 
-games.updateBidAndBidWinner = function(data, callback) {
-	client.runQuery(updateBidAndBidWinnerQuery, {
-		gameId: data.gameId,
-		bid: data.bid,
-		winnerId: data.winnerId
-	}, function(results, fields) {
-		callback();
+games.updateHukumPartners = function(data) {
+	var promiseResults = {};
+	var cardDeck = cardsHandler.createCardDeck((emptyCardDeck) => {
+		emptyCardDeck[data.partnerInfo.firstPartner.suit] = cardsHandler.createDBFormatFromCard(data.partnerInfo.firstPartner.cards);
 	});
+
+	return promiseUtil.create((resolve, reject) => {
+		users.insertNewCardState(cardDeck)
+		.then((firstPartner) => {
+			promiseResults.firstPartner = firstPartner;
+			cardDeck = cardsHandler.createCardDeck((emptyCardDeck) => {
+				emptyCardDeck[data.partnerInfo.secondPartner.suit] = cardsHandler.createDBFormatFromCard(data.partnerInfo.secondPartner.cards);
+			});
+			return users.insertNewCardState(cardDeck);		
+		})
+		.then((secondPartner) => {
+			promiseResults.secondPartner = secondPartner;
+			return client.runQuery(updateHukumPartnersQuery, {
+					gameId: data.gameId,
+					hukum: data.partnerInfo.hukum,
+					firstPartnerId: promiseResults.firstPartner.insertId,
+					secondPartnerId: promiseResults.secondPartner.insertId
+				});
+		})
+		.then((results, fields) => {
+			resolve(results);
+		})
+		.catch((err) => {
+			reject(err);
+		});
+	});
+
+	// users.insertNewCardState(cardDeck, (firstPartner) => {
+	// 	cardDeck = {
+	// 	diamonds: cardsHandler.createDBFormatFromCard('-1'),
+	// 	spades: cardsHandler.createDBFormatFromCard('-1'),
+	// 	clubs: cardsHandler.createDBFormatFromCard('-1'),
+	// 	hearts: cardsHandler.createDBFormatFromCard('-1')
+	// 	};
+
+	// 	cardDeck[data.partnerInfo.secondPartner.suit] = cardsHandler.createDBFormatFromCard(data.partnerInfo.secondPartner.cards);	
+	// 	users.insertNewCardState(cardDeck, (secondPartner) => {
+	// 		client.runQuery(updateHukumPartnersQuery, {
+	// 			gameId: data.gameId,
+	// 			hukum: data.partnerInfo.hukum,
+	// 			firstPartnerId: firstPartner.insertId,
+	// 			secondPartnerId: secondPartner.insertId
+	// 		}, (results, fields) => {
+	// 			callback(results);
+	// 		});
+	// 	});
+	// });
 }
 
-games.updateGameState = function(gameId, gameState, callback) {
-	client.runQuery(updateGameStateQuery, {
-		gameState: gameState,
-		gameId: gameId
-	}, function(results, fields) {
-		//check for success and failure over here
-		callback();
+games.updateBidAndBidWinner = function(data) {
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(updateBidAndBidWinnerQuery, {
+			gameId: data.gameId,
+			bid: data.bid,
+			winnerId: data.winnerId
+		})
+		.then((results, fields) => {
+			resolve(results);
+		})
+		.catch((error) => {
+			reject(error);
+		})
 	});
+
+	// client.runQuery(updateBidAndBidWinnerQuery, {
+	// 	gameId: data.gameId,
+	// 	bid: data.bid,
+	// 	winnerId: data.winnerId
+	// }, function(results, fields) {
+	// 	callback();
+	// });
 }
 
-games.updateOwner = function(gameId, ownerUserId, callback) {
+games.updateGameState = function(gameId, gameState) {
+
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(updateGameStateQuery, {
+			gameState: gameState,
+			gameId: gameId
+		})
+		.then((results, fields) => {
+			resolve(results);
+		})
+		.catch((error) => {
+			reject(error);
+		})
+	});
+
+	// client.runQuery(updateGameStateQuery, {
+	// 	gameState: gameState,
+	// 	gameId: gameId
+	// }, function(results, fields) {
+	// 	//check for success and failure over here
+	// 	callback();
+	// });
+}
+
+games.updateOwner = function(gameId, ownerUserId) {
 	var game = {
 		gameId: gameId,
 		ownerId: ownerUserId
 	};
 
-	client.runQuery(updateOwnerQuery, game, callback);
-}
-
-games.increasePlayerCount = function(gameId, callback) {
-	var game = {
-		gameId: gameId
-	};
-	client.runQuery(updateNumOfUsersQuery, game, function(results, fields) {
-		callback();
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(updateOwnerQuery, game)
+		.then((results, fields) => {
+			resolve(results);
+		})
+		.catch((error) => {
+			reject(error);
+		})
 	});
+
+	//client.runQuery(updateOwnerQuery, game, callback);
 }
 
-games.getCurrentPlayerCount = function(gameId, callback) {
-	client.runQuery(getPlayerCount, {gameId: gameId}, (results, fields) => {
-		if(results.length > 0) {
-			callback(results[0].users_count);
-		}
-		else {
-			throw new Error("invalid query");
-		}
+games.increasePlayerCount = function(gameId) {
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(updateNumOfUsersQuery, {
+			gameId: gameId
+		})
+		.then((results, fields) => {
+			resolve(results);
+		})
+		.catch((error) => {
+			reject(error);
+		})
 	});
+
+	// client.runQuery(updateNumOfUsersQuery, game, function(results, fields) {
+	// 	callback();
+	// });
 }
 
-games.getAllPlayers = function(gameId, callback) {
-	client.runQuery(getAllPlayers, {gameId: gameId}, function(results, fields) {
-		callback(results);
+games.getCurrentPlayerCount = function(gameId) {
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(getPlayerCount, {
+			gameId: gameId
+		})
+		.then((results, fields) => {
+			if(results.length > 0) {
+				resolve(results[0].users_count);
+			}
+			else {
+				throw new Error("invalid query");
+			}
+		})
+		.catch((err) => {
+			reject(err);
+		});
 	});
+
+	// client.runQuery(getPlayerCount, {gameId: gameId}, (results, fields) => {
+	// 	if(results.length > 0) {
+	// 		callback(results[0].users_count);
+	// 	}
+	// 	else {
+	// 		throw new Error("invalid query");
+	// 	}
+	// });
 }
 
-games.getGameState = function(gameId, callback) {
-	client.runQuery(getGameStateQuery, {gameId: gameId}, function(results, fields) {
-		if(results.length > 0) {
-			callback(results[0].game_state);
-		}
-		else {
-			throw new Error("query error");
-		}
+games.getAllPlayers = function(gameId) {
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(getAllPlayers, {
+			gameId: gameId
+		})
+		.then((results, fields) => {
+			resolve(results);
+		})
+		.catch((err) => {
+			reject(err);
+		});
 	});
+
+	// client.runQuery(getAllPlayers, {gameId: gameId}, function(results, fields) {
+	// 	callback(results);
+	// });
 }
 
-games.getHukum = function(gameId, callback) {
-	client.runQuery(getHukumQuery, {gameId: gameId}, function(results, fields) {
-		callback(results, fields);
+games.getGameState = function(gameId) {
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(getGameStateQuery, {
+			"gameId": gameId
+		})
+		.then((results, fields) => {
+			if(results.length > 0) {
+				resolve(results[0].game_state);
+			}
+			else {
+				throw new Error("query error");
+			}	
+		})
+		.catch((err) => {
+			reject(err);
+		});
 	});
+
+	// client.runQuery(getGameStateQuery, {gameId: gameId}, function(results, fields) {
+	// 	if(results.length > 0) {
+	// 		callback(results[0].game_state);
+	// 	}
+	// 	else {
+	// 		throw new Error("query error");
+	// 	}
+	// });
 }
 
-games.getBidWinner = function(gameId, callback) {
-	client.runQuery(getBidWinnerQuery, {gameId: gameId}, function(results, fields) {
-		callback(results, fields);
+games.getHukum = function(gameId) {
+	return promiseUtil.create((resolve, reject) => {
+		client.runQuery(getHukumQuery, {
+			gameId: gameId
+		})
+		.then((results, fields) => {
+			resolve(results);
+		})
+		.catch((err) => {
+			reject(err);
+		});
+	});
+
+	// client.runQuery(getHukumQuery, {gameId: gameId}, function(results, fields) {
+	// 	callback(results, fields);
+	// });
+}
+
+games.getBidWinner = function(gameId) {
+	return promiseUtil.create((resolve, reject) => {
+		return client.runQuery(getBidWinnerQuery, {gameId: gameId})
+		.then((results, fields) => {
+			resolve(results);
+		})
+		.catch((error) => {
+			reject(error);
+		});
 	});
 }
 
