@@ -16,7 +16,7 @@ module.exports = {
 		},
 		MAX_PLAYERS: 7,
 		MIN_PLAYERS: 4,
-		BID_COUNTDOWN: 30
+		BID_COUNTDOWN: 10
 	}
 };
 

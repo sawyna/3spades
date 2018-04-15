@@ -4,8 +4,8 @@ var users = require('../db/queries/users');
 var games = require('../db/queries/games');
 var cardsHandler = require('../middleware/cardsHandler');
 var errorHandler = require('../errors/errorHandler');
-var RoundStore = require('./roundStore');
-var InfoStorage = require('./infoStorage');
+var RoundOperator = require('./roundOperator');
+var inMemoryStorage = require('./inMemoryStorage');
 
 module.exports = {
 
@@ -13,18 +13,21 @@ module.exports = {
 	newPlayer: function(io, socket) {
 		socket.on("NEW_PLAYER", (data) => {
 			let roomId = String(data.gameId);
-			socket._appdata.userId = data.user.id;
+			let userId = data.user.id;
+
+			socket._appdata.userId = userId;
 			
 			socket.join(roomId);
 			
 			let response = {
 				type: "NEW_PLAYER_JOINED",
 				payload: {
-					userId: data.user.id,
+					userId: userId,
 					gameId: data.gameId
 				}
 			};
-			//console.log(io.sockets.adapter.rooms[String(data.gameId)]);
+
+			inMemoryStorage.putSocket(String(data.gameId), String(userId), socket);
 
 			io.sockets.in(roomId).emit("NEW_PLAYER_JOINED", response);
 		});
@@ -56,23 +59,19 @@ module.exports = {
 
 			games.updateGameState(data.gameId, config.gameStates.GAME_START)
 			.then((results) => {
-				console.log("level1");
 				return games.getAllPlayers(data.gameId);
 			})
 			.then((results) => {
-				console.log("level2");
 				cardsHandler.generateInitialDeck(results);
 				let promiseArray = [];
 
-				console.log("card deck generated");
 				for(let i = 0; i < results.length; i++) {
 					promiseArray.push(users.saveDeck(results[i].id, results[i].cards));
 				}
 
-				console.log("here");
 				Promise.all(promiseArray)
 				.then((results) => {
-					synctimers.bidTimer(io, socket, 30, data.gameId, "BID_TIMER", "BID_TIMER_RESET", "BID_END");
+					synctimers.bidTimer(io, socket, config.BID_COUNTDOWN, data.gameId, "BID_TIMER", "BID_TIMER_RESET", "BID_END");
 					io.sockets.in(String(data.gameId)).emit("GAME_STARTED", {});
 				})
 				.catch((err) => {
@@ -106,28 +105,75 @@ module.exports = {
 
 	chooseHukumAndPartners: function(io, socket) {
 		socket.on("HUKUM_PARTNERS_CHOSEN", (data) => {
+			var roomId = String(data.gameId);
 			games.updateHukumPartners(data)
 			.then((results) => {
 				return games.updateGameState(data.gameId, config.gameStates.WINNER_CHOOSE);
 			})
 			.then(() => {
-				io.sockets.in(String(data.gameId)).emit("HUKUM_PARTNERS_RESULT", data);
-				RoundStore(data.gameId, (roundStore) => {
-						InfoStorage.put(data.gameId, roundStore);
-						io.sockets.in(String(data.gameId)).emit("ROUND_TURN_START", roundStore.getInfo());
+				io.sockets.in(roomId).emit("HUKUM_PARTNERS_RESULT", data);
+				RoundOperator.load(data.gameId, (instance) => {
+					inMemoryStorage
+					.getSocket(data.gameId, instance.getCurrentPlayerId())
+					.emit("ROUND_TURN_START", {
+						currentDeck: instance.getCurrentDeck(),
+						"first": instance.isFirst(),
+						"activeSuit": instance.getActiveSuit()
 					});
-				//TODO start the rounds
+				});
 			});
+		});
+	},
 
-			// games.updateHukumPartners(data, (results) => {
-			// 	games.updateGameState(data.gameId, config.gameStates.WINNER_CHOOSE, () => {
-			// 		io.sockets.in(String(data.gameId)).emit("HUKUM_PARTNERS_RESULT", data);
-			// 		RoundStore(data.gameId, (roundStore) => {
-			// 			InfoStorage.put(data.gameId, roundStore);
-			// 			io.sockets.in(String(data.gameId)).emit("ROUND_TURN_START", roundStore.getInfo());
-			// 		});
-			// 	});
-			// });
+	/*
+	{
+		gameId: 1234,
+		userId: 12345,
+		card: {
+			num: <1 to 13>,
+			suit: <D, C, H, S>
+		}
+	}
+	*/
+
+	playRounds: function(io, socket) {
+		socket.on("ROUND_TURN_PLAYED", (data) => {
+
+			var roomId = String(data.gameId);
+			var instance = inMemoryStorage.getRoundOps(roomId);
+			//check if there is really an object
+			if(instance) {
+				instance.playTurn(data);
+				var response = {
+					"currentDeck": instance.getCurrentDeck()
+				};
+
+
+				io.sockets.in(roomId).emit("ROUND_TURN_END", response);
+
+				if(instance.isDone()) {
+					//rethink about this broadcast
+					io.sockets.in(String(data.gameId)).emit("ROUND_WINNER", instance.getWinner());
+					let prevRoundWinnerId = instance.getWinner().userId;
+					instance.reset(prevRoundWinnerId);
+					inMemoryStorage
+					.getSocket(data.gameId, prevRoundWinnerId)
+					.emit("ROUND_TURN_START", {
+						currentDeck: instance.getCurrentDeck(),
+						"first": instance.isFirst(),
+						"activeSuit": instance.getActiveSuit()
+					});
+				}
+				else {
+					inMemoryStorage
+					.getSocket(data.gameId, instance.getCurrentPlayerId())
+					.emit("ROUND_TURN_START", {
+						currentDeck: instance.getCurrentDeck(),
+						"first": instance.isFirst(),
+						"activeSuit": instance.getActiveSuit(),
+					});
+				}
+			}
 		});
 	}
 }

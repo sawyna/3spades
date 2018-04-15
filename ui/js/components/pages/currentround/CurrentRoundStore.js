@@ -31,7 +31,8 @@ class CurrentRoundStore extends EventEmitter {
 		socketClient.listen("ROUND_TURN_END", (data) => {
 			var cards = this.getInitialCards();
 			data.currentDeck.forEach((elem) => {
-				cards[elem.card.cardType][elem.card.cardNum] = 1;
+				console.log(elem);
+				cards[elem.card.suit][elem.card.num] = 1;
 			});
 			this.cards = cards;
 			this.emit("change");

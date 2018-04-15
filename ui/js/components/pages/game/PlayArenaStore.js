@@ -26,10 +26,8 @@ class PlayArenaStore extends EventEmitter {
 
 		socketClient.listen("ROUND_TURN_START", (data) => {
 			console.log(data);
-			if(data.playerList[data.currTurnIdx].userId === gameStore.data.user.id) {
-				this.enablePlay = true;
-				this.emit("change");
-			}
+			this.enablePlay = true;
+			this.emit("change");
 		});
 	}
 

@@ -256,7 +256,7 @@ games.getHukum = function(gameId) {
 			gameId: gameId
 		})
 		.then((results, fields) => {
-			resolve(results);
+			resolve(results[0]["hukum"]);
 		})
 		.catch((err) => {
 			reject(err);
@@ -272,7 +272,7 @@ games.getBidWinner = function(gameId) {
 	return promiseUtil.create((resolve, reject) => {
 		return client.runQuery(getBidWinnerQuery, {gameId: gameId})
 		.then((results, fields) => {
-			resolve(results);
+			resolve(results[0]["bid_winner"]);
 		})
 		.catch((error) => {
 			reject(error);

@@ -12,12 +12,14 @@ class PlayArenaActions {
 				card: card
 			}
 		});
-		socketClient.send("ROUND_TURN_DONE", {
+
+		socketClient.send("ROUND_TURN_PLAYED", {
 			gameId: gameStore.data.gameId,
-			userInfo: {
-				userId: gameStore.data.user.id
-			},
-			card: card
+			userId: gameStore.data.user.id,
+			card: {
+				"num": card.cardNum,
+				"suit": card.cardType
+			}
 		});
 	}
 }
