@@ -2,7 +2,7 @@ import React from 'react';
 import InputButton from '../../core/inputButton';
 import SyncTimer from '../../core/synctimer';
 import biddingActions from './BiddingActions';
-import biddingStore from './biddingStore';
+import biddingStore from './BiddingStore';
 
 export default class BiddingArea extends React.Component {
 
