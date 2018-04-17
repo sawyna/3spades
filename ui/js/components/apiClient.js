@@ -2,7 +2,7 @@ import API from 'fetch-api';
 
 class APIClient {
 	constructor() {
-		this.baseURL = "http://localhost:9000";
+		this.baseURL = "http://35.200.156.243:9000";
 		this.api = new API({
 			baseURI: this.baseURL
 		});

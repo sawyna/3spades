@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 
 class SocketClient {
 	constructor() {
-		this.endPoint = "http://localhost:9000";
+		this.endPoint = "http://35.200.156.243:9000";
 		this.socket = io(this.endPoint);
 	}
 
