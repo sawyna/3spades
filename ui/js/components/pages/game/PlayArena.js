@@ -34,11 +34,6 @@ export default class PlayArena extends React.Component {
 	playCard() {
 		if(playArenaStore.getActiveSuit() !== undefined) {
 			let isActiveSuitCardPresent = false;
-
-
-			console.log("In PlayArena");
-			window.playArena = {};
-			window.playArena.state = this.state;
 			
 			for(let i = 0; i < this.state.cards[playArenaStore.getActiveSuit()].length; i++) {
 				if(this.state.cards[playArenaStore.getActiveSuit()][i] === 1) {
