@@ -32,20 +32,48 @@ export default class PlayArena extends React.Component {
 	}
 
 	playCard() {
-		
-		playArenaActions.play(this.store.clickedCard);
-		this.setState((state, props) => {
-			state.cards[this.store.clickedCard.cardType][this.store.clickedCard.cardNum] = 0;
-			return {
-				cards: state.cards
-			};
-		});
+		if(playArenaStore.getActiveSuit() !== undefined) {
+			let isActiveSuitCardPresent = false;
+
+
+			console.log("In PlayArena");
+			window.playArena = {};
+			window.playArena.state = this.state;
+			
+			for(let i = 0; i < this.state.cards[playArenaStore.getActiveSuit()].length; i++) {
+				if(this.state.cards[playArenaStore.getActiveSuit()][i] === 1) {
+					isActiveSuitCardPresent = true;
+					break;
+				}
+			}
+
+			if(isActiveSuitCardPresent && this.store.clickedCard.cardType !== playArenaStore.getActiveSuit()) {
+				alert(`You need to play ${playArenaStore.getActiveSuit()}`);
+			}
+			else {
+				playArenaActions.play(this.store.clickedCard);
+				this.setState((state, props) => {
+					state.cards[this.store.clickedCard.cardType][this.store.clickedCard.cardNum] = 0;
+					return {
+						cards: state.cards
+					};
+				});	
+			}
+		}
+		else {
+			playArenaActions.play(this.store.clickedCard);
+			this.setState((state, props) => {
+				state.cards[this.store.clickedCard.cardType][this.store.clickedCard.cardNum] = 0;
+				return {
+					cards: state.cards
+				};
+			});
+		}
 	}
 
 	render() {
 		var style = {
 			"height": this.props.height,
-			"display": "inline-block",
 			"margin": "0"
 		};
 		return (

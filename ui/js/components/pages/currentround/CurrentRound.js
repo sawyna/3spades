@@ -26,7 +26,6 @@ export default class CurrentRound extends React.Component {
 	render() {
 		var style = {
 			"height": this.props.height,
-			"display": "inline-block",
 			"margin": "0"
 		};
 

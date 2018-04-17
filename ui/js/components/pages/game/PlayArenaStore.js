@@ -10,6 +10,8 @@ class PlayArenaStore extends EventEmitter {
 		this.userInfo = {};
 		this.cards = {};
 		this.enablePlay = false;
+		this.activeSuit = undefined;
+		this.hukum = undefined;
 		this.handleSocketEvents();
 	}
 
@@ -27,6 +29,8 @@ class PlayArenaStore extends EventEmitter {
 		socketClient.listen("ROUND_TURN_START", (data) => {
 			console.log(data);
 			this.enablePlay = true;
+			this.activeSuit = data.activeSuit;
+			this.hukum = data.hukum;
 			this.emit("change");
 		});
 	}
@@ -66,6 +70,14 @@ class PlayArenaStore extends EventEmitter {
 
 	getEnablePlay() {
 		return this.enablePlay;
+	}
+
+	getActiveSuit() {
+		return this.activeSuit;
+	}
+
+	getHukum() {
+		return this.hukum;
 	}
 
 	handleActions(action) {
