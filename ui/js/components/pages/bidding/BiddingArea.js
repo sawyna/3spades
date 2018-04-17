@@ -22,6 +22,11 @@ export default class BiddingArea extends React.Component {
 				"errorMessage": "bid should be only in multiples of 5"
 			});
 		}
+		else if(bidValue > 480) {
+			this.setState({
+				"errorMessage": "bid cannot exceed 480"
+			});	
+		}
 		else {
 			this.setState({
 				"errorMessage": ""
