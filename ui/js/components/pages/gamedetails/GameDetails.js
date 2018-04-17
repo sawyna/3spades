@@ -77,10 +77,10 @@ export default class GameDetails extends React.Component {
 		if(this.selectedValues.hukum === undefined) {
 			alert("Choose hukum");
 		}
-		else if(this.selectedValues.firstPartner === undefined) {
+		else if(this.selectedValues.firstPartner === undefined || this.selectedValues.firstPartner.suit === undefined || this.selectedValues.firstPartner.cards === undefined ) {
 			alert("Choose first partner details");
 		}
-		else if(this.selectedValues.secondPartner === undefined) {
+		else if(this.selectedValues.secondPartner === undefined || this.selectedValues.secondPartner.suit === undefined || this.selectedValues.secondPartner.cards === undefined ) {
 			alert("Choose second partner details");
 		}		
 		else {

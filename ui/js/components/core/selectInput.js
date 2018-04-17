@@ -32,6 +32,7 @@ export default class SelectInput extends React.Component {
 		for(var select in this.state.options) {
 			selectList.push(
 				<select onChange = {this.storeSelect.bind(this, select)}>
+					<option selected disabled>Choose</option>
 					{
 						(() => {
 							return this.state.options[select].map((option) => {
