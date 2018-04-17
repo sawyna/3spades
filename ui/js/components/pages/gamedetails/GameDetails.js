@@ -74,8 +74,25 @@ export default class GameDetails extends React.Component {
 	}
 
 	finalize() {
-		gameDetailsStore.disableChoosing();
-		gameDetailsActions.chosePartners(this.selectedValues);
+		if(this.selectedValues.hukum === undefined) {
+			alert("Choose hukum");
+		}
+		else if(this.selectedValues.firstPartner.suit === undefined) {
+			alert("Choose first partner suit");
+		}
+		else if(this.selectedValues.firstPartner.cards === undefined) {
+			alert("Choose first partner card");
+		}
+		else if(this.selectedValues.secondPartner.suit === undefined) {
+			alert("Choose second partner suit");
+		}
+		else if(this.selectedValues.secondPartner.cards === undefined) {
+			alert("Choose second partner card");
+		}		
+		else {
+			gameDetailsStore.disableChoosing();
+			gameDetailsActions.chosePartners(this.selectedValues);
+		}
 	}
 
 	render() {
