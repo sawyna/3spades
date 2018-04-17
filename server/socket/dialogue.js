@@ -118,7 +118,8 @@ module.exports = {
 					.emit("ROUND_TURN_START", {
 						currentDeck: instance.getCurrentDeck(),
 						"first": instance.isFirst(),
-						"activeSuit": instance.getActiveSuit()
+						"activeSuit": instance.getActiveSuit(),
+						"hukum": instance.getHukum()
 					});
 				});
 			});
@@ -161,7 +162,8 @@ module.exports = {
 					.emit("ROUND_TURN_START", {
 						currentDeck: instance.getCurrentDeck(),
 						"first": instance.isFirst(),
-						"activeSuit": instance.getActiveSuit()
+						"activeSuit": instance.getActiveSuit(),
+						"hukum": instance.getHukum()
 					});
 				}
 				else {

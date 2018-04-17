@@ -158,6 +158,10 @@ var RoundOperator = function(gameId, playerList, hukum, bidWinner) {
 		return _.roundInfo.playerList[_.roundInfo.currTurnIdx].id;
 	}
 
+	this.getHukum = function() {
+		return _.roundInfo.hukum;
+	}
+
 	//TODO remove this before deploying
 	this.print = function() {
 		console.log(_.roundInfo);
