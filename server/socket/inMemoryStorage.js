@@ -41,4 +41,8 @@ module.exports = {
 
 		return undefined;
 	},
+
+	deleteGame: function(gameId) {
+		delete infoMap[String(gameId)];
+	}
 };
