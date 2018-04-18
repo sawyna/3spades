@@ -34,6 +34,28 @@ var NormalToDBMapping = {
 	'A':  "0000000000001"	
 };
 
+var scores = {
+	"3": 5,
+	"8": 10,
+	"9": 15,
+	"10": 20,
+	"11": 25,
+	"12": 30
+};
+
+/**
+	card : {
+		num: <1 to 13>
+		suit: <D, C, H, S>
+	}
+**/
+handler.isSpecialCard = function(card) {
+	if(card.num === 1 && card.suit === 'spades')
+		return true;
+
+	return false;
+}
+
 handler.generateInitialDeck = function(users) {
 	var values = [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
 	var suits = ['D', 'H', 'C', 'S'];
@@ -128,6 +150,19 @@ handler.createCardDeck = function(callback) {
 		callback(emptyCardDeck);
 
 	return emptyCardDeck;
+}
+
+handler.getScore = function(deck) {
+	var score = 0;
+	deck.forEach((element) => {
+		let card =  element.card;
+		if(handler.isSpecialCard(card))
+			score += 60;
+		else if(scores.hasOwnProperty(String(card.num)))
+			score += scores[String(card.num)];
+	});
+
+	return score;
 }
 
 

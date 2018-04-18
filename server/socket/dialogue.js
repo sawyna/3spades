@@ -154,16 +154,25 @@ module.exports = {
 
 				if(instance.isDone()) {
 					//rethink about this broadcast
-					io.sockets.in(String(data.gameId)).emit("ROUND_WINNER", instance.getWinner());
-					let prevRoundWinnerId = instance.getWinner().userId;
-					instance.reset(prevRoundWinnerId);
-					inMemoryStorage
-					.getSocket(data.gameId, prevRoundWinnerId)
-					.emit("ROUND_TURN_START", {
-						currentDeck: instance.getCurrentDeck(),
-						"first": instance.isFirst(),
-						"activeSuit": instance.getActiveSuit(),
-						"hukum": instance.getHukum()
+					let winner = instance.getWinner();
+					users.getUserInfo(winner.userId)
+					.then((results) => {
+						io.sockets.in(String(data.gameId)).emit("ROUND_WINNER", {
+							"winner": winner,
+							"score": cardsHandler.getScore(instance.getCurrentDeck()),
+							"userName": (results.length > 0 ? results[0].userName : "NA"),
+							"roundNumber": instance.getRoundNumber()
+						});
+						let prevRoundWinnerId = instance.getWinner().userId;
+						instance.reset(prevRoundWinnerId);
+						inMemoryStorage
+						.getSocket(data.gameId, prevRoundWinnerId)
+						.emit("ROUND_TURN_START", {
+							currentDeck: instance.getCurrentDeck(),
+							"first": instance.isFirst(),
+							"activeSuit": instance.getActiveSuit(),
+							"hukum": instance.getHukum()
+						});
 					});
 				}
 				else {

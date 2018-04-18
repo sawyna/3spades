@@ -19,7 +19,8 @@ var RoundOperator = function(gameId, playerList, hukum, bidWinner) {
 			winner: {},
 			currentDeck: [],
 			hukum: hukum,
-			roundSize: playerList.length
+			roundSize: playerList.length,
+			roundCount: 1
 		};
 
 		_.decideFirstPlayer(firstPlayerId);
@@ -135,6 +136,7 @@ var RoundOperator = function(gameId, playerList, hukum, bidWinner) {
 		_.roundInfo.currentDeck = [];
 		_.roundInfo.hukum = hukum;
 		_.roundInfo.roundSize = playerList.length;
+		_.roundInfo.roundCount++;
 
 		_.decideFirstPlayer(firstPlayerId);
 	}
@@ -160,6 +162,10 @@ var RoundOperator = function(gameId, playerList, hukum, bidWinner) {
 
 	this.getHukum = function() {
 		return _.roundInfo.hukum;
+	}
+
+	this.getRoundNumber = function() {
+		return _.roundInfo.roundCount;
 	}
 
 	//TODO remove this before deploying
