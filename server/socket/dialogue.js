@@ -160,7 +160,7 @@ module.exports = {
 						io.sockets.in(String(data.gameId)).emit("ROUND_WINNER", {
 							"winner": winner,
 							"score": cardsHandler.getScore(instance.getCurrentDeck()),
-							"userName": (results.length > 0 ? results[0].userName : "NA"),
+							"name": (results.length > 0 ? results[0].userName : "NA"),
 							"roundNumber": instance.getRoundNumber()
 						});
 						let prevRoundWinnerId = instance.getWinner().userId;

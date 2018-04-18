@@ -37,6 +37,11 @@ class CurrentRoundStore extends EventEmitter {
 			this.cards = cards;
 			this.emit("change");
 		});
+
+		socketClient.listen("ROUND_WINNER", (data) => {
+			this.cards = this.getInitialCards();
+			this.emit("change");
+		});
 	};
 }
 

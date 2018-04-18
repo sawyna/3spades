@@ -10,7 +10,8 @@ export default class GameDetails extends React.Component {
 			"bidWinnerName": "NA",
 			"bidValue": "NA",
 			"enable": false,
-			partnerInfo : {}
+			partnerInfo : {},
+			"roundWinners": []
 		};
 
 		this.selectedValues = {};
@@ -26,6 +27,13 @@ export default class GameDetails extends React.Component {
 					partnerInfo: gameDetailsStore.getPartnerInfo()
 				}
 			});
+		});
+
+		gameDetailsStore.on("updateWinners", () => {
+			console.log(gameDetailsStore.getRoundWinners());
+			this.setState({
+				"roundWinners": gameDetailsStore.getRoundWinners()
+			})
 		});
 	}
 
@@ -111,6 +119,19 @@ export default class GameDetails extends React.Component {
 							<button onClick = {this.finalize.bind(this)}>Finalize</button>
 						</div>
 					}
+
+					<div>
+						<h3>Rounds</h3>
+						<ul>
+							{
+								(() => {
+									return this.state.roundWinners.map((roundWinnerInfo) => {
+										return (<li>Winner: {roundWinnerInfo.name}, Score: {roundWinnerInfo.score}</li>);
+									});
+								})()
+							}
+						</ul>
+					</div>
 				</div>
 			);
 	}

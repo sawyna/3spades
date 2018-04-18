@@ -16,6 +16,7 @@ class GameDetailsStore extends EventEmitter {
 		};
 		
 		this.partnerInfo = {};
+		this.roundWinners = [];
 	}
 
 	handleSocketEvents() {
@@ -31,6 +32,11 @@ class GameDetailsStore extends EventEmitter {
 		socketClient.listen("HUKUM_PARTNERS_RESULT", (data) => {
 			this.partnerInfo = data.partnerInfo;
 			this.emit("change");
+		});
+
+		socketClient.listen("ROUND_WINNER", (data) => {
+			this.roundWinners.push(data);
+			this.emit("updateWinners");
 		});
 	}
 
@@ -48,6 +54,10 @@ class GameDetailsStore extends EventEmitter {
 
 	getPartnerInfo() {
 		return this.partnerInfo;
+	}
+
+	getRoundWinners() {
+		return this.roundWinners;
 	}
 
 }
