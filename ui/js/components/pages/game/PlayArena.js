@@ -25,6 +25,14 @@ export default class PlayArena extends React.Component {
 				enablePlay: playArenaStore.getEnablePlay()
 			});
 		});
+
+		playArenaStore.on("playEnabled", () => {
+			this.setState({
+				enablePlay: playArenaStore.getEnablePlay()
+			});
+
+			alert("Your turn dude");
+		});
 	}
 
 	clickedCard(card) {

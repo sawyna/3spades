@@ -31,7 +31,7 @@ class PlayArenaStore extends EventEmitter {
 			this.enablePlay = true;
 			this.activeSuit = data.activeSuit;
 			this.hukum = data.hukum;
-			this.emit("change");
+			this.emit("playEnabled");
 		});
 	}
 
