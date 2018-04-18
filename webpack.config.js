@@ -42,7 +42,7 @@ module.exports = {
     new webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false })
   ],
   externals: {
-    AppConfig: JSON.stringify(process.env.ENV === 'production' ? {
+    AppConfig: JSON.stringify(process.env.NODE_ENV === 'production' ? {
       serverUrl: "http://35.200.156.243:9000"
     } : {
       serverUrl: "http://localhost:9000"
