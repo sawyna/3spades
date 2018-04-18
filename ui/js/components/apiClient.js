@@ -1,8 +1,9 @@
 import API from 'fetch-api';
+import Config from 'AppConfig';
 
 class APIClient {
 	constructor() {
-		this.baseURL = "http://35.200.156.243:9000";
+		this.baseURL = Config.serverUrl;
 		this.api = new API({
 			baseURI: this.baseURL
 		});

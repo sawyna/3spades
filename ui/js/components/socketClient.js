@@ -1,8 +1,9 @@
 import io from 'socket.io-client';
+import Config from 'AppConfig';
 
 class SocketClient {
 	constructor() {
-		this.endPoint = "http://35.200.156.243:9000";
+		this.endPoint = Config.serverUrl;
 		this.socket = io(this.endPoint);
 	}
 
