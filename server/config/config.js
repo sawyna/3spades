@@ -1,7 +1,9 @@
+var isProduction = process.env.NODE_ENV === 'production';
+
 module.exports = {
 	dbConfig: {
 		host: "localhost",
-		port: 3307,
+		port: isProduction ? 3306: 3307,
 		user: "sawyna",
 		password: "yaswanth",
 		database: "3spades"
